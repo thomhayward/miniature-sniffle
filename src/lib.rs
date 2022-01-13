@@ -4,6 +4,11 @@ mod endpoints;
 mod inner;
 pub use endpoints::{DocBuilder, QueryBuilder};
 
+#[cfg(feature = "json")]
+mod json;
+#[cfg(feature = "json")]
+pub use json::*;
+
 pub struct Client {
     inner: Arc<inner::Client>,
 }
