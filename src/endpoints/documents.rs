@@ -1,8 +1,7 @@
-use super::SanityClientInner;
+use crate::inner::SanityClientInner;
 use reqwest::Method;
 use std::sync::Arc;
 
-#[derive(Debug)]
 pub struct DocumentsBuilder<'a> {
     client: Arc<SanityClientInner>,
     document_ids: Vec<&'a str>,

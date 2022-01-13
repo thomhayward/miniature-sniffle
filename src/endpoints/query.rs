@@ -1,9 +1,8 @@
-use super::SanityClientInner;
+use crate::inner::SanityClientInner;
 use reqwest::Method;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Debug)]
 pub struct QueryBuilder<'a> {
     client: Arc<SanityClientInner>,
     query: String,
