@@ -1,14 +1,14 @@
-use crate::inner::SanityClientInner;
+use crate::inner::Client;
 use reqwest::Method;
 use std::sync::Arc;
 
 pub struct DocumentsBuilder<'a> {
-    client: Arc<SanityClientInner>,
+    client: Arc<Client>,
     document_ids: Vec<&'a str>,
 }
 
 impl<'a> DocumentsBuilder<'a> {
-    pub(crate) fn new(client: Arc<SanityClientInner>, ids: &[&'a str]) -> DocumentsBuilder<'a> {
+    pub(crate) fn new(client: Arc<Client>, ids: &[&'a str]) -> DocumentsBuilder<'a> {
         DocumentsBuilder {
             client,
             document_ids: Vec::from(ids),

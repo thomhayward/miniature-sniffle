@@ -1,15 +1,26 @@
-
-pub (crate) struct SanityClientInner {
-    pub(crate) client: reqwest::Client,
-    pub(crate) base: String,
-    pub(crate) project: String,
-    pub(crate) dataset: String,
-    pub(crate) api: String,
-    pub(crate) cdn: bool,
-    pub(crate) token: Option<String>,
+#[derive(Clone)]
+pub(crate) struct Client {
+    client: reqwest::Client,
+    base: String,
+    project: String,
+    dataset: String,
+    api: String,
+    cdn: bool,
+    token: Option<String>,
 }
 
-impl SanityClientInner {
+impl Client {
+    pub(crate) fn new(client: reqwest::Client, project: &str, dataset: &str, api: &str) -> Client {
+        Client {
+            client,
+            project: String::from(project),
+            dataset: String::from(dataset),
+            api: String::from(api),
+            cdn: Default::default(),
+            token: Default::default(),
+            base: build_base_url(project, api, false),
+        }
+    }
     pub(crate) fn begin(
         &self,
         method: reqwest::Method,
@@ -22,4 +33,24 @@ impl SanityClientInner {
         }
         self.client.request(method, url)
     }
+
+    pub(crate) fn set_cdn(&mut self, use_cdn: bool) -> &mut Client {
+        self.cdn = use_cdn;
+        self.base = build_base_url(&self.project, &self.api, use_cdn);
+        self
+    }
+
+    pub(crate) fn set_token(&mut self, token: &str) -> &mut Client {
+        self.token = Some(String::from(token));
+        self
+    }
+}
+
+fn build_base_url(project: &str, api: &str, cdn: bool) -> String {
+    format!(
+        "https://{}.{}.sanity.io/v{}/data",
+        project,
+        if cdn { "apicdn" } else { "api" },
+        api
+    )
 }

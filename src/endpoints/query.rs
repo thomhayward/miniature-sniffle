@@ -1,16 +1,16 @@
-use crate::inner::SanityClientInner;
+use crate::inner::Client;
 use reqwest::Method;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct QueryBuilder<'a> {
-    client: Arc<SanityClientInner>,
+    client: Arc<Client>,
     query: String,
     params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> QueryBuilder<'a> {
-    pub(crate) fn new(client: Arc<SanityClientInner>, query: &str) -> QueryBuilder {
+    pub(crate) fn new(client: Arc<Client>, query: &str) -> QueryBuilder {
         QueryBuilder {
             client,
             query: String::from(query),

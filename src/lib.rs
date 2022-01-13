@@ -1,85 +1,42 @@
 use std::sync::Arc;
 
-mod inner;
 mod endpoints;
+mod inner;
 pub use endpoints::{DocumentsBuilder, QueryBuilder};
 
-pub struct SanityClient {
-    inner: Arc<inner::SanityClientInner>,
+pub struct Client {
+    inner: Arc<inner::Client>,
 }
 
-fn build_base_url(project: &str, api: &str, cdn: bool) -> String {
-    format!(
-        "https://{}.{}.sanity.io/v{}/data",
-        project,
-        if cdn { "apicdn" } else { "api" },
-        api
-    )
-}
-
-impl SanityClient {
+impl Client {
     /// Create a new client with the specified project_id, dataset, and api version.
     ///
-    pub fn new(project: &str, dataset: &str, api: &str) -> SanityClient {
-        SanityClient {
-            inner: Arc::new(inner::SanityClientInner {
-                client: reqwest::Client::new(),
-                base: build_base_url(project, api, false),
-                project: String::from(project),
-                dataset: String::from(dataset),
-                api: String::from(api),
-                cdn: false,
-                token: None,
-            }),
+    pub fn new(project: &str, dataset: &str, api: &str) -> Client {
+        let client = reqwest::Client::new();
+        let new_inner = inner::Client::new(client, project, dataset, api);
+        Client {
+            inner: Arc::new(new_inner),
         }
     }
     /// Set the authentication token
     ///
     /// [https://www.sanity.io/docs/http-auth]
     #[must_use]
-    pub fn token(self, token: &str) -> SanityClient {
-        let inner::SanityClientInner {
-            project,
-            dataset,
-            api,
-            cdn,
-            ..
-        } = &*self.inner;
-        SanityClient {
-            inner: Arc::new(inner::SanityClientInner {
-                client: reqwest::Client::new(),
-                base: build_base_url(project, api, *cdn),
-                project: String::from(project),
-                dataset: String::from(dataset),
-                api: String::from(api),
-                cdn: false,
-                token: Some(String::from(token)),
-            }),
-        }
+    pub fn with_token(mut self, token: &str) -> Self {
+        let mut new_inner = (*self.inner).clone();
+        new_inner.set_token(token);
+        self.inner = Arc::new(new_inner);
+        self
     }
     /// Set or unset use of the API CDN.
     ///
     /// [https://www.sanity.io/docs/api-cdn]
     #[must_use]
-    pub fn cdn(self, use_cdn: bool) -> SanityClient {
-        let inner::SanityClientInner {
-            project,
-            dataset,
-            api,
-            token,
-            ..
-        } = &*self.inner;
-        SanityClient {
-            inner: Arc::new(inner::SanityClientInner {
-                client: reqwest::Client::new(),
-                base: build_base_url(project, api, use_cdn),
-                project: String::from(project),
-                dataset: String::from(dataset),
-                api: String::from(api),
-                cdn: use_cdn,
-                token: token.as_ref().map(|value| String::from(value)),
-            }),
-        }
+    pub fn use_cdn(mut self, use_cdn: bool) -> Self {
+        let mut new_inner = (*self.inner).clone();
+        new_inner.set_cdn(use_cdn);
+        self.inner = Arc::new(new_inner);
+        self
     }
     /// Create a QueryBuilder to execute queries on the 'Query' endpoint.
     ///
