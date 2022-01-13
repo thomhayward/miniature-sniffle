@@ -19,7 +19,7 @@ impl Client {
             project: String::from(project),
             dataset: String::from(dataset),
             api: String::from(api),
-            cdn: Default::default(),
+            cdn: true,
             base: build_base_url(project, api, false),
         }
     }
