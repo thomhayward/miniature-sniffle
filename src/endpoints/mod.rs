@@ -1,4 +1,4 @@
-mod documents;
+mod doc;
 mod query;
-pub use documents::*;
+pub use doc::*;
 pub use query::*;

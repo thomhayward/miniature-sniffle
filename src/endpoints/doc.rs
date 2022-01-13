@@ -2,25 +2,25 @@ use crate::inner::Client;
 use reqwest::Method;
 use std::sync::Arc;
 
-pub struct DocumentsBuilder<'a> {
+pub struct DocBuilder<'a> {
     client: Arc<Client>,
     document_ids: Vec<&'a str>,
 }
 
-impl<'a> DocumentsBuilder<'a> {
-    pub(crate) fn new(client: Arc<Client>, ids: &[&'a str]) -> DocumentsBuilder<'a> {
-        DocumentsBuilder {
+impl<'a> DocBuilder<'a> {
+    pub(crate) fn new(client: Arc<Client>, ids: &[&'a str]) -> DocBuilder<'a> {
+        DocBuilder {
             client,
             document_ids: Vec::from(ids),
         }
     }
-    pub fn documents(&'a mut self, ids: &[&'a str]) -> &'a mut DocumentsBuilder {
+    pub fn documents(&'a mut self, ids: &[&'a str]) -> &'a mut DocBuilder {
         self.document_ids.extend_from_slice(ids);
         self
     }
     /// Add a document id to fetch to the builder
     ///
-    pub fn document(&'a mut self, id: &'a str) -> &'a mut DocumentsBuilder {
+    pub fn document(&'a mut self, id: &'a str) -> &'a mut DocBuilder {
         self.document_ids.push(id);
         self
     }

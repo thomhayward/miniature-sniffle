@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 mod endpoints;
 mod inner;
-pub use endpoints::{DocumentsBuilder, QueryBuilder};
+pub use endpoints::{DocBuilder, QueryBuilder};
 
 pub struct Client {
     inner: Arc<inner::Client>,
@@ -44,13 +44,13 @@ impl Client {
     pub fn query<'a>(&self, query: &'a str) -> endpoints::QueryBuilder<'a> {
         endpoints::QueryBuilder::new(self.inner.clone(), query)
     }
-    /// Create a DocumentsBuilder to query documents by id from the 'Doc' endpoint.
+    /// Create a DocBuilder to query documents by id from the 'Doc' endpoint.
     ///
     /// [https://www.sanity.io/docs/http-doc]
-    pub fn documents<'a>(&self, ids: &[&'a str]) -> endpoints::DocumentsBuilder<'a> {
-        endpoints::DocumentsBuilder::new(self.inner.clone(), ids)
+    pub fn documents<'a>(&self, ids: &[&'a str]) -> endpoints::DocBuilder<'a> {
+        endpoints::DocBuilder::new(self.inner.clone(), ids)
     }
-    pub fn document<'a>(&self, id: &'a str) -> endpoints::DocumentsBuilder<'a> {
-        endpoints::DocumentsBuilder::new(self.inner.clone(), &[id])
+    pub fn document<'a>(&self, id: &'a str) -> endpoints::DocBuilder<'a> {
+        endpoints::DocBuilder::new(self.inner.clone(), &[id])
     }
 }
