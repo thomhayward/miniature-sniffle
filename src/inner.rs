@@ -1,3 +1,7 @@
+use reqwest::header;
+use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::{Method, RequestBuilder};
+
 #[derive(Clone)]
 pub(crate) struct Client {
     client: reqwest::Client,
@@ -6,7 +10,6 @@ pub(crate) struct Client {
     dataset: String,
     api: String,
     cdn: bool,
-    token: Option<String>,
 }
 
 impl Client {
@@ -17,20 +20,12 @@ impl Client {
             dataset: String::from(dataset),
             api: String::from(api),
             cdn: Default::default(),
-            token: Default::default(),
             base: build_base_url(project, api, false),
         }
     }
-    pub(crate) fn begin(
-        &self,
-        method: reqwest::Method,
-        endpoint: &str,
-        path: &str,
-    ) -> reqwest::RequestBuilder {
+
+    pub(crate) fn begin(&self, method: Method, endpoint: &str, path: &str) -> RequestBuilder {
         let url = format!("{}/{}/{}/{}", &self.base, endpoint, &self.dataset, path);
-        if let Some(token) = &self.token {
-            return self.client.request(method, url).bearer_auth(token);
-        }
         self.client.request(method, url)
     }
 
@@ -41,7 +36,18 @@ impl Client {
     }
 
     pub(crate) fn set_token(&mut self, token: &str) -> &mut Client {
-        self.token = Some(String::from(token));
+        // Construct an 'Authorization: Bearer <token>' header
+        let mut bearer = HeaderValue::from_str(&format!("Bearer {}", token))
+            .expect("inner::Client::set_token(), error building HeaderValue from token");
+        bearer.set_sensitive(true);
+        let mut headers = HeaderMap::new();
+        headers.insert(header::AUTHORIZATION, bearer);
+        // Build a new client with the authorization header as a default header
+        let new_client = reqwest::Client::builder()
+            .default_headers(headers)
+            .build()
+            .expect("inner::Client::set_token(), error building reqwest::Client");
+        self.client = new_client;
         self
     }
 }
